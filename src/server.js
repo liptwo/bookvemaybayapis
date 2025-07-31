@@ -1,59 +1,57 @@
-const express = require('express')
-const http = require('http')
-const { Server } = require('socket.io')
+/* eslint-disable no-console */
+import express from 'express'
+import cors from 'cors'
+import { connectToDatabase, EXIT_DB } from '~/config/mongodb'
+import exitHook from 'async-exit-hook'
+import { ENV } from './config/environment'
+import { APIs_V1 } from '~/routes/v1'
+import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
+import { corsOptions } from '~/config/cors'
+import cookieParser from 'cookie-parser'
 
-const app = express()
-const server = http.createServer(app)
 
-// Cấu hình CORS để React app (chạy ở port 3000) có thể kết nối
-const io = new Server(server, {
-  cors: {
-    origin: 'http://localhost:5173',
-    methods: ['GET', 'POST']
+const START_SEVER = () => {
+  const app = express()
+
+  // fix cache from disk của express js
+  app.use((req, res, next) => {
+    res.set('Cache-Control', 'no-store')
+    next()
+  })
+
+  app.use(cookieParser())
+
+  app.use(cors(corsOptions))
+
+  app.use(express.json())
+
+  app.use('/v1', APIs_V1)
+  // app.use(express.urlencoded({ extended: true }))
+
+  app.get('/', (req, res) => {
+    res.end('<h1>Hello World!</h1><hr>')
+  })
+
+  // midleware xử lý lỗi tập trung
+  app.use(errorHandlingMiddleware)
+
+  app.listen(ENV.LOCAL_DEV_APP_PORT, ENV.LOCAL_DEV_APP_HOST, () => {
+    console.log(`Hello Liptwo, I am running at http://${ENV.LOCAL_DEV_APP_HOST}:${ENV.LOCAL_DEV_APP_PORT}/`)
+  })
+  exitHook(() => {
+    console.log('Exit DB')
+    EXIT_DB()
+  })
+}
+
+(async () => {
+  try {
+    console.log('1. Connecting to database...')
+    await connectToDatabase() // Make sure to await this
+    console.log('2. Successfully connected to database!')
+    START_SEVER()
+  } catch (error) {
+    console.error('Failed to start server:', error)
+    process.exit(1) // Use exit code 1 for errors
   }
-})
-
-// --- Các route API của Express ---
-// app.get('/api/trips/:tripId', tripController.getTripDetails);
-// app.post('/api/bookings', bookingController.createBooking);
-
-// --- Logic xử lý Socket.IO ---
-io.on('connection', (socket) => {
-  console.log('Một người dùng đã kết nối:', socket.id)
-
-  // Lắng nghe sự kiện khi client muốn tham gia vào phòng của một chuyến xe
-  socket.on('join-trip-room', (tripId) => {
-    socket.join(tripId) // Cho socket này vào phòng có tên là tripId
-    console.log(`Socket ${socket.id} đã tham gia phòng ${tripId}`)
-  })
-
-  // Lắng nghe sự kiện khi client chọn một ghế
-  socket.on('select-seat', ({ tripId, number, selector }) => {
-    // TODO: Viết logic kiểm tra và cập nhật trạng thái ghế trong Database
-    // 1. Tìm ghế trong DB với tripId và seatNumber
-    // 2. Nếu ghế 'available' -> cập nhật status thành 'selecting', lưu socket.id
-    // 3. Thiết lập một setTimeout để giải phóng ghế sau 5 phút
-
-    // Gửi cập nhật đến TẤT CẢ client khác trong cùng phòng
-    console.log(selector)
-    io.to(tripId).emit('seat-updated', { number, status: 'selecting', selector: selector })
-  })
-  socket.on('seat-de-select', ({ tripId, number }) => {
-    console.log('hello')
-    io.to(tripId).emit('seat-updated', { number, status: 'available', selector: '' })
-  })
-
-  // Lắng nghe sự kiện khi client ngắt kết nối
-  socket.on('disconnect', () => {
-    console.log('Người dùng đã ngắt kết nối:', socket.id)
-    // TODO: Xử lý giải phóng tất cả các ghế mà user này đang 'selecting'
-    // 1. Tìm trong DB tất cả các ghế có 'lockedBy' là socket.id này
-    // 2. Cập nhật status của chúng về 'available'
-    // 3. Gửi sự kiện 'seat-updated' cho các phòng tương ứng
-  })
-})
-
-const PORT = 8080
-server.listen(PORT, () => {
-  console.log(`Server đang chạy tại cổng ${PORT}`)
-})
+})()
