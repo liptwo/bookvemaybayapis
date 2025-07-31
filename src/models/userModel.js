@@ -9,7 +9,7 @@ const USER_ROLES = {
 }
 
 const USER_COLLECTION_NAME = 'users'
-const USER_COLLECTION_SCHEMA = Joi. object({
+const USER_COLLECTION_SCHEMA = Joi.object({
   email: Joi.string().required().pattern(EMAIL_RULE).message(EMAIL_RULE_MESSAGE), // unique
   password: Joi.string().required(),
   // username cắt ra từ email sẽ có khả năng không unique bởi vì sẽ có những tên email trùng nhau nhưng từ
