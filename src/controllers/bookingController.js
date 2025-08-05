@@ -4,8 +4,8 @@ import { bookingService } from '~/services/bookingService'
 const createNew = async (req, res, next) => {
   try {
     // req.user sẽ được gán bởi một middleware xác thực (ví dụ: isAuthorized)
-    // const user = req.user user,
-    const createdBooking = await bookingService.createNew(req.body)
+    const userId = req.jwtDecoded._id
+    const createdBooking = await bookingService.createNew(userId, req.body)
     res.status(StatusCodes.CREATED).json(createdBooking)
   } catch (error) { next(error) }
 }
@@ -21,6 +21,13 @@ const getBookingById = async (req, res, next) => {
   try {
     const bookingId = req.params
     const bookings = await bookingService.getBookingById(bookingId)
+    res.status(StatusCodes.OK).json(bookings)
+  } catch (error) { next(error) }
+}
+const update = async (req, res, next) => {
+  try {
+    // const bookingId = req.params
+    const bookings = await bookingService.update(req.body)
     res.status(StatusCodes.OK).json(bookings)
   } catch (error) { next(error) }
 }

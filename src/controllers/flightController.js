@@ -12,8 +12,8 @@ const find = async (req, res, next) => {
   try {
     // Dữ liệu tìm kiếm đến từ req.query
     console.log(req.query)
-    // const flights = await flightService.find()
-    // res.status(StatusCodes.OK).json(flights)
+    const flights = await flightService.find(req.query)
+    res.status(StatusCodes.OK).json(flights)
   } catch (error) { next(error) }
 }
 

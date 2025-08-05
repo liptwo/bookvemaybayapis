@@ -132,8 +132,8 @@ const update = async ( userId, reqBody, userAvataFile ) => {
       // console.log('🚀 ~ userService.js:88 ~ update ~ updatedUser:', updatedUser)
     }
     // console.log(updatedUser)
-    // console.log(updatedUser)
-    return pickUser(updatedUser.value)
+    console.log(updatedUser)
+    return pickUser(updatedUser)
   } catch (error) { throw error }
 }
 

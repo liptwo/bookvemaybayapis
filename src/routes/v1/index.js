@@ -4,6 +4,7 @@ import { StatusCodes } from 'http-status-codes'
 import { userRoute } from './userRoute'
 import { flightRoute } from './flightRoute'
 import { bookingRoute } from './bookingRoute'
+// import { bookingSeatRoute } from './bookingSeatRoute'
 
 
 Router.get('/', (req, res) => {
@@ -25,5 +26,8 @@ Router.use('/flights', flightRoute)
 
 /** Booking APIs */
 Router.use('/bookings', bookingRoute)
+
+// Booking Seat API //
+// Router.use('/bookingseat', bookingSeatRoute)
 
 export const APIs_V1 = Router

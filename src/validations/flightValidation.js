@@ -12,13 +12,12 @@ const createNew = async (req, res, next) => {
 const find = async (req, res, next) => {
   const correctCondition = Joi.object({
     departureAirport: Joi.string().required().length(3).uppercase(),
-    arrivalAirport: Joi.string().required().length(3).uppercase(),
-    departureDate: Joi.date().iso().required()
+    arrivalAirport: Joi.string().required().length(3).uppercase()
   })
 
   try {
     // Validate req.query thay vì req.body cho việc tìm kiếm (GET)
-    await correctCondition.validateAsync(req.query, { abortEarly: false })
+    await correctCondition.validateAsync(req.query, { abortEarly: false, allowUnknown: true })
     next()
   } catch (error) {
     next(new ApiError(StatusCodes.UNPROCESSABLE_ENTITY, new Error(error).message))

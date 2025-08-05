@@ -24,10 +24,12 @@ const find = async (queryParams) => {
 
     // Tạo khoảng thời gian tìm kiếm trong ngày departureDate
     const startOfDay = new Date(departureDate)
-    startOfDay.setHours(0, 0, 0, 0)
-
+    // console.log(startOfDay.getTime())
+    startOfDay.setUTCHours(0, 0, 0, 0)
+    console.log(startOfDay)
     const endOfDay = new Date(departureDate)
     endOfDay.setHours(23, 59, 59, 999)
+    console.log(endOfDay)
 
     const query = {
       departureAirport,

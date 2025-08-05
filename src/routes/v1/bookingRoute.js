@@ -6,11 +6,11 @@ import { authMiddleware } from '~/middlewares/authMiddlewares'
 
 Router.route('/')
   // Cần một middleware để xác thực người dùng trước khi cho phép đặt vé
-  .post(/*authMiddleware.isAuthorized,*/ bookingValidation.createNew, bookingController.createNew)
+  .post(authMiddleware.isAuthorized, bookingValidation.createNew, bookingController.createNew)
 
 Router.route('/:id')
   .get(/*authMiddleware.isAuthorized,*/ bookingController.getBookingById)
-  // .post(bookingValidation.createNew, bookingController.createNew)
+  // .put(bookingValidation.update, bookingController.update)
 
 Router.route('/my-bookings')
   // Cần middleware xác thực để lấy được req.user

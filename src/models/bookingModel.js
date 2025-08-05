@@ -21,7 +21,7 @@ const BOOKING_COLLECTION_SCHEMA = Joi.object({
 
   passengerName: Joi.string().required().trim().strict(),
   passengerEmail: Joi.string().email().required(),
-  seatNumber: Joi.string().required().trim().strict(), // E.g., "A23", "B15"
+  seatNumber: Joi.string().trim().strict().default(''), // E.g., "A23", "B15"
 
   status: Joi.string()
     .valid(...Object.values(BOOKING_STATUS))
@@ -31,7 +31,7 @@ const BOOKING_COLLECTION_SCHEMA = Joi.object({
   updatedAt: Joi.date().timestamp('javascript').default(null),
   _destroy: Joi.boolean().default(false)
 })
-
+const INVALID_UPDATE_FIELDS = ['userId', 'flightId', 'passengerName', 'passengerEmail']
 const createNew = async (data) => {
   try {
     const validData = await BOOKING_COLLECTION_SCHEMA.validateAsync(data, {
@@ -63,14 +63,40 @@ const findOneById = async (bookingId) => {
   }
 }
 
-const findByUserId = async(userId) => {
+const findByUserId = async (userId) => {
   try {
     // Dùng toArray để lấy về một danh sách
-    const result = await GET_DB().collection(BOOKING_COLLECTION_NAME).find({
-      userId: new ObjectId(userId)
-    }).toArray()
+    const result = await GET_DB()
+      .collection(BOOKING_COLLECTION_NAME)
+      .find({
+        userId: new ObjectId(userId)
+      })
+      .toArray()
     return result
-  } catch (error) { throw new Error(error) }
+  } catch (error) {
+    throw new Error(error)
+  }
+}
+
+const update = async (bookingId, reqBody) => {
+  try {
+    Object.keys(reqBody).forEach((fieldName) => {
+      if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
+        delete reqBody[fieldName]
+      }
+    })
+
+    const result = await GET_DB()
+      .collection(BOOKING_COLLECTION_NAME)
+      .findOneAndUpdate(
+        { _id: new ObjectId(bookingId) },
+        { $set: reqBody },
+        { returnDocument: 'after' }
+      )
+    return result
+  } catch (error) {
+    throw new Error(error)
+  }
 }
 
 export const bookingModel = {
@@ -78,5 +104,6 @@ export const bookingModel = {
   BOOKING_COLLECTION_SCHEMA,
   createNew,
   findOneById,
-  findByUserId
+  findByUserId,
+  update
 }

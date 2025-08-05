@@ -8,11 +8,12 @@ import { APIs_V1 } from '~/routes/v1'
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware'
 import { corsOptions } from '~/config/cors'
 import cookieParser from 'cookie-parser'
-
+import { initSocket } from '~/config/socket'
+import http from 'http' // Thêm thư viện http
 
 const START_SEVER = () => {
   const app = express()
-
+  console.log(ENV.BUILD_MODE)
   // fix cache from disk của express js
   app.use((req, res, next) => {
     res.set('Cache-Control', 'no-store')
@@ -28,6 +29,12 @@ const START_SEVER = () => {
   app.use('/v1', APIs_V1)
   // app.use(express.urlencoded({ extended: true }))
 
+  // Tạo một server http từ app express
+  const httpServer = http.createServer(app)
+
+  // Khởi tạo Socket.IO bằng cách truyền httpServer vào
+  initSocket(httpServer)
+
   app.get('/', (req, res) => {
     res.end('<h1>Hello World!</h1><hr>')
   })
@@ -35,7 +42,7 @@ const START_SEVER = () => {
   // midleware xử lý lỗi tập trung
   app.use(errorHandlingMiddleware)
 
-  app.listen(ENV.LOCAL_DEV_APP_PORT, ENV.LOCAL_DEV_APP_HOST, () => {
+  httpServer.listen(ENV.LOCAL_DEV_APP_PORT, ENV.LOCAL_DEV_APP_HOST, () => {
     console.log(`Hello Liptwo, I am running at http://${ENV.LOCAL_DEV_APP_HOST}:${ENV.LOCAL_DEV_APP_PORT}/`)
   })
   exitHook(() => {

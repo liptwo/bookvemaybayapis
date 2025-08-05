@@ -3,10 +3,12 @@ import { bookingModel } from '~/models/bookingModel'
 import { flightModel } from '~/models/flightModel'
 import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
+import { getIO } from '~/config/socket'
 // user,
-const createNew = async ( reqBody) => {
+const createNew = async (userId, reqBody) => {
   try {
-    const { flightId, userId, passengerName, passengerEmail, seatNumber } = reqBody
+    const { flightId, passengerName, passengerEmail, seatNumber } =
+      reqBody
 
     // 1. Kiểm tra chuyến bay có tồn tại và còn chỗ không
     const flight = await flightModel.findOneById(flightId)
@@ -40,6 +42,16 @@ const createNew = async ( reqBody) => {
       availableSeats: flight.availableSeats - 1
     })
 
+    // Sau khi mọi thứ đã thành công, gửi thông báo đến đúng người dùng đó.
+    const notification = {
+      message: `Bạn đã đặt vé thành công cho chuyến bay ${flight.flightNumber}.`,
+      bookingDetails: getNewBooking,
+      timestamp: new Date()
+    }
+
+    // Gửi sự kiện 'booking:success' vào "phòng" riêng của người dùng
+    getIO().to(userId.toString()).emit('booking:success', notification)
+
     return getNewBooking
   } catch (error) {
     throw error
@@ -50,18 +62,29 @@ const getMyBookings = async (user) => {
   try {
     const bookings = await bookingModel.findByUserId(user._id)
     return bookings
-  } catch (error) { throw error }
+  } catch (error) {
+    throw error
+  }
 }
 
 const getBookingById = async (bookingId) => {
   try {
     // const bookingId = reqBody.bookingId
-    const bookings = await bookingModel.findOneById(bookingId)
+    const bookings = await bookingModel.update(bookingId)
     return bookings
-  } catch (error) { throw error }
+  } catch (error) {
+    throw error
+  }
 }
-
-
+const update = async (reqBody) => {
+  try {
+    const bookingId = reqBody.bookingId
+    const bookings = await bookingModel.findOneById(bookingId, reqBody)
+    return bookings
+  } catch (error) {
+    throw error
+  }
+}
 
 export const bookingService = {
   createNew,
