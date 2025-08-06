@@ -5,6 +5,7 @@ import { userRoute } from './userRoute'
 import { flightRoute } from './flightRoute'
 import { bookingRoute } from './bookingRoute'
 import { chatRoute } from './chatRoute'
+import { notiRoute } from './notiRoute'
 // import { bookingSeatRoute } from './bookingSeatRoute'
 
 
@@ -31,6 +32,8 @@ Router.use('/bookings', bookingRoute)
 // Booking Seat API //
 // Router.use('/bookingseat', bookingSeatRoute)
 
+/** Noti APi*/
+Router.use('/noti', notiRoute)
 /** Chat API */
 Router.use('/chat', chatRoute)
 export const APIs_V1 = Router

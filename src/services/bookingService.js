@@ -4,6 +4,7 @@ import { flightModel } from '~/models/flightModel'
 import ApiError from '~/utils/ApiError'
 import { StatusCodes } from 'http-status-codes'
 import { getIO } from '~/config/socket'
+import { notiModel } from '~/models/notiModel'
 // user,
 const createNew = async (userId, reqBody) => {
   try {
@@ -44,11 +45,13 @@ const createNew = async (userId, reqBody) => {
 
     // Sau khi mọi thứ đã thành công, gửi thông báo đến đúng người dùng đó.
     const notification = {
+      userId,
       message: `Bạn đã đặt vé thành công cho chuyến bay ${flight.flightNumber}.`,
       status: 'success',
       bookingDetails: getNewBooking,
       timestamp: new Date()
     }
+    await notiModel.createNew(notification)
 
     // Gửi sự kiện 'booking:success' vào "phòng" riêng của người dùng
     getIO().to(userId.toString()).emit('booking:success', notification)
