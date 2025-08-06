@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
 import { chatService } from '~/services/chatService'
 import { getIO } from '~/config/socket.js'
+import { conversationModel } from '~/models/conversationModel'
 
 const startConversation = async (req, res, next) => {
   try {

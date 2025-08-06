@@ -65,6 +65,8 @@ const update = async (conversationId, updateData) => {
     })
     // Luôn cập nhật updatedAt
     updateData.updatedAt = Date.now()
+    // updateData.status = updateData.status || CONVERSATION_STATUS.PENDING
+
 
     const result = await GET_DB().collection(CONVERSATION_COLLECTION_NAME).findOneAndUpdate(
       { _id: new ObjectId(conversationId) },

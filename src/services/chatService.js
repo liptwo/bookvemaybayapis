@@ -13,7 +13,7 @@ const startConversation = async (clientData) => {
 
     // Thông báo cho admin có cuộc trò chuyện mới
     const io = getIO()
-    io.emit('new-conversation', fullConversation)
+    io.to('admin_room').emit('new-conversation', fullConversation)
 
     return fullConversation
   } catch (error) { throw error }
@@ -29,6 +29,7 @@ const getOpenConversations = async () => {
 // Lấy lịch sử tin nhắn
 const getConversationHistory = async (conversationId) => {
   try {
+    // const conversation = await conversationModel.update(conversationId, { status: 'active' })
     const conversation = await conversationModel.findOneById(conversationId)
     if (!conversation) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Conversation not found')
@@ -43,7 +44,6 @@ const postMessage = async (messageData) => {
   try {
     const { conversationId, senderId, senderRole, content } = messageData
     const newMessage = await messageModel.createNew({ conversationId, senderId, senderRole, content })
-
     // Gửi tin nhắn đến tất cả trong phòng chat
     const io = getIO()
     io.to(conversationId).emit('new-message', newMessage)

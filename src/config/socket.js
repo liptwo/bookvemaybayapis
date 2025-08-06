@@ -1,6 +1,8 @@
 import { Server } from 'socket.io'
 import { corsOptions } from './cors.js'
-import { configureChatSocket } from '~/sockets/chatSocket.js'
+import { userModel } from '~/models/userModel.js'
+import { chatService } from '~/services/chatService.js'
+// import { configureChatSocket } from '~/sockets/chatSocket.js'
 
 let io
 
@@ -12,11 +14,43 @@ export const initSocket = (httpServer) => {
     }
   })
 
-  // Cấu hình chat socket
-  configureChatSocket(io)
-
   io.on('connection', (socket) => {
     console.log(`A user connected with socket id: ${socket.id}`)
+
+    // Lấy thông tin user từ handshake
+    const { userId, userRole } = socket.handshake.auth
+
+    // Admin join admin room
+    if (userRole === userModel.USER_ROLES.ADMIN) {
+      socket.join('admin_room')
+      console.log(`Admin ${userId} joined admin_room`)
+    }
+
+    // Join conversation
+    socket.on('join-conversation', ({ conversationId }) => {
+      socket.join(conversationId)
+      console.log(`User joined conversation: ${conversationId}`)
+    })
+    // Gửi tin nhắn
+    socket.on('send-message', async (data) => {
+      try {
+        const { conversationId, content } = data
+        const senderId =
+          userRole === userModel.USER_ROLES.ADMIN ? userId : socket.id
+
+        const messageData = {
+          conversationId,
+          senderId,
+          senderRole: userRole || 'client',
+          content
+        }
+
+        await chatService.postMessage(messageData)
+      } catch (error) {
+        console.error('Error sending message:', error)
+        socket.emit('error', { message: error.message })
+      }
+    })
 
     // Lắng nghe sự kiện khi người dùng tham gia vào "phòng" riêng của họ
     // Frontend sẽ gửi sự kiện này cùng với userId sau khi đăng nhập
