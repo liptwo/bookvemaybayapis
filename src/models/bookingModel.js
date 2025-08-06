@@ -80,11 +80,13 @@ const findByUserId = async (userId) => {
 
 const update = async (bookingId, reqBody) => {
   try {
-    Object.keys(reqBody).forEach((fieldName) => {
-      if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
-        delete reqBody[fieldName]
-      }
-    })
+    // Object.keys(reqBody).forEach((fieldName) => {
+    //   if (INVALID_UPDATE_FIELDS.includes(fieldName)) {
+    //     delete reqBody[fieldName]
+    //   }
+    // })
+    // console.log('rb ', reqBody)
+    // console.log('bkid' ,bookingId)
 
     const result = await GET_DB()
       .collection(BOOKING_COLLECTION_NAME)

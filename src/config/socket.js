@@ -1,5 +1,7 @@
 import { Server } from 'socket.io'
 import { corsOptions } from './cors.js'
+import { configureChatSocket } from '~/sockets/chatSocket.js'
+
 let io
 
 export const initSocket = (httpServer) => {
@@ -9,6 +11,10 @@ export const initSocket = (httpServer) => {
       methods: ['GET', 'POST']
     }
   })
+
+  // Cấu hình chat socket
+  configureChatSocket(io)
+
   io.on('connection', (socket) => {
     console.log(`A user connected with socket id: ${socket.id}`)
 

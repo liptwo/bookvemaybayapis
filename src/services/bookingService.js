@@ -45,6 +45,7 @@ const createNew = async (userId, reqBody) => {
     // Sau khi mọi thứ đã thành công, gửi thông báo đến đúng người dùng đó.
     const notification = {
       message: `Bạn đã đặt vé thành công cho chuyến bay ${flight.flightNumber}.`,
+      status: 'success',
       bookingDetails: getNewBooking,
       timestamp: new Date()
     }

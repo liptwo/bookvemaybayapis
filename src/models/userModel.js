@@ -40,11 +40,22 @@ const createNew = async ( data ) => {
 
 const findOneById = async( userId ) => {
   try {
+    // console.log('🔍 userModel.findOneById - userId:', userId)
+    // console.log('🔍 userModel.findOneById - userId type:', typeof userId)
+    
+    const objectId = new ObjectId(userId)
+    // console.log('🔍 userModel.findOneById - objectId:', objectId)
+    
     const result = await GET_DB().collection(USER_COLLECTION_NAME).findOne({
-      _id: new ObjectId(userId)
+      _id: objectId
     })
+    
+    // console.log('🔍 userModel.findOneById - result:', result ? 'Found' : 'Not found')
     return result
-  } catch (error) { throw new Error(error) }
+  } catch (error) { 
+    // console.error('❌ userModel.findOneById - Error:', error)
+    throw new Error(error) 
+  }
 }
 
 

@@ -24,13 +24,13 @@ const getBookingById = async (req, res, next) => {
     res.status(StatusCodes.OK).json(bookings)
   } catch (error) { next(error) }
 }
-const update = async (req, res, next) => {
-  try {
-    // const bookingId = req.params
-    const bookings = await bookingService.update(req.body)
-    res.status(StatusCodes.OK).json(bookings)
-  } catch (error) { next(error) }
-}
+// const update = async (req, res, next) => {
+//   try {
+//     // const bookingId = req.params
+//     const bookings = await bookingService.update(req.body)
+//     res.status(StatusCodes.OK).json(bookings)
+//   } catch (error) { next(error) }
+// }
 
 export const bookingController = {
   createNew,
