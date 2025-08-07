@@ -6,8 +6,8 @@ import { bookingSeatValidation } from '~/validations/bookingValidation'
 
 Router.route('/').post(
   authMiddleware.isAuthorized,
-  bookingSeatValidation.createBookingSeat,
-  bookingSeatController.createBookingSeat
+  bookingSeatValidation.createNew,
+  bookingSeatController.createBookingSeatInvitation
 )
 
 Router.route('/:bookingSeatId').put(

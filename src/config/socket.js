@@ -5,7 +5,8 @@ import { chatService } from '~/services/chatService.js'
 // import { configureChatSocket } from '~/sockets/chatSocket.js'
 
 let io
-
+// const flightSeats = {}
+const flightSeats = {}
 export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
@@ -25,7 +26,48 @@ export const initSocket = (httpServer) => {
       socket.join('admin_room')
       console.log(`Admin ${userId} joined admin_room`)
     }
+    // Choose seat
+    // socket.on('join:chooseSeat', (flightId) => {
+    //   socket.join(flightId)
+    //   console.log(`User joined flight: ${flightId}`)
+    // })
+    // socket.emit('seatUpdate', occupiedSeats)
 
+    // socket.on('holdSeat', (seat) => {
+    //   if (!occupiedSeats.includes(seat)) {
+    //     occupiedSeats.push(seat)
+    //     io.emit('seatUpdate', occupiedSeats)
+    //   }
+    // })
+    socket.on('join', ({ flightId, userId }) => {
+      socket.join(flightId)
+      socket.data.userId = userId
+      socket.data.flightId = flightId
+
+      if (!flightSeats[flightId]) flightSeats[flightId] = {}
+      io.to(flightId).emit('seatUpdate', flightSeats[flightId])
+    })
+
+    socket.on('selectSeat', ({ seat }) => {
+      const { userId, flightId } = socket.data
+      if (!flightId || !userId) return
+
+      const seats = flightSeats[flightId]
+      if (!seats) return
+
+      // Check if seat is taken by someone else
+      if (seats[seat] && seats[seat].userId !== userId) return
+
+      // Release old seat (if any)
+      for (const [s, info] of Object.entries(seats)) {
+        if (info.userId === userId) delete seats[s]
+      }
+
+      // Assign new seat
+      seats[seat] = { userId }
+
+      io.to(flightId).emit('seatUpdate', seats)
+    })
     // Join conversation
     socket.on('join-conversation', ({ conversationId }) => {
       socket.join(conversationId)
@@ -61,6 +103,14 @@ export const initSocket = (httpServer) => {
 
     socket.on('disconnect', () => {
       console.log(`User with socket id: ${socket.id} disconnected.`)
+      const { userId, flightId } = socket.data
+      if (userId && flightId && flightSeats[flightId]) {
+        const seats = flightSeats[flightId]
+        for (const [seat, info] of Object.entries(seats)) {
+          if (info.userId === userId) delete seats[seat]
+        }
+        io.to(flightId).emit('seatUpdate', seats)
+      }
     })
   })
 

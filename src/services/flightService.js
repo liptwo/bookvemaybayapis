@@ -55,6 +55,7 @@ const getDetails = async (flightId) => {
     if (!flight) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'Flight not found!')
     }
+    // console.log(flight)
     return flight
   } catch (error) {
     throw error
