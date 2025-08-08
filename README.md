@@ -126,6 +126,6 @@ Dự án được cấu trúc theo mô hình Layered Architecture để dễ dà
 
 4.  **Chạy server:**
     ```bash
-    npm start
+    npm run dev
     ```
     Server sẽ chạy tại địa chỉ `http://localhost:8017` (hoặc port bạn đã cấu hình).
