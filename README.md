@@ -1,4 +1,4 @@
-# BookVeXeAPIs - API cho Hệ thống Đặt vé máy bay
+# BookVeMayBayAPIs - API cho Hệ thống Đặt vé máy bay
 
 Đây là dự án backend (API) cho một ứng dụng đặt vé máy bay, được xây dựng bằng Node.js, Express.js và MongoDB, với các tính năng thời gian thực sử dụng Socket.IO.
 
